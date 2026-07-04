@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Alderley Room Planner</title>
+  <link rel="stylesheet" href="styles.css?v=15">
+</head>
+<body>
+  <header class="app-header">
+    <div><p class="eyebrow">Alderley Planner</p><h1>Room planner</h1></div>
+    <div class="room-picker"><label for="roomSelect">Room</label><select id="roomSelect"></select></div>
+  </header>
+  <main class="app-shell">
+    <section class="planner-panel" aria-label="Room plan">
+      <div class="room-toolbar">
+        <div><h2 id="roomName">Living Room</h2><p id="roomDimensions">496cm x 330cm</p></div>
+        <div class="layout-controls"><label for="layoutSelect">Layout</label><div class="layout-row"><select id="layoutSelect"></select><button id="newLayoutBtn" type="button">New</button><button id="duplicateLayoutBtn" type="button">Duplicate</button><button id="clearLayoutBtn" type="button" class="danger">Clear</button></div></div>
+      </div>
+      <div class="plan-scroll"><div id="plan" class="plan" aria-label="Selected room plan"></div></div>
+      <div class="selection-bar"><div><strong id="selectedName">No item selected</strong><span id="selectedDetails">Tap furniture, a door, or a window to edit it.</span></div><div class="selection-actions"><button id="rotateBtn" type="button" disabled>Rotate 90</button><button id="deleteBtn" type="button" class="danger" disabled>Delete</button></div></div>
+    </section>
+    <aside class="side-panel" aria-label="Planning tools">
+      <section><h2>Furniture library</h2><div class="add-to-room"><select id="librarySelect"></select><button id="addToRoomBtn" type="button">Add to room</button></div><div id="libraryList" class="library-list"></div></section>
+      <section><h2>Add door</h2><form id="doorForm" class="furniture-form"><div class="form-grid"><label>Width cm<input name="width" type="number" min="20" value="80" required></label><label>Swing depth cm<input name="depth" type="number" min="20" value="80" required></label></div><label>Door opens<select name="swing"><option value="right">Right</option><option value="left">Left</option></select></label><button type="submit">Add door</button></form></section>
+      <section><h2>Add custom furniture</h2><form id="furnitureForm" class="furniture-form"><label>Name<input name="name" required autocomplete="off"></label><label>Category<input name="category" required autocomplete="off"></label><div class="form-grid"><label>Width cm<input name="width" type="number" min="1" required></label><label>Depth cm<input name="depth" type="number" min="1" required></label></div><div class="form-grid"><label>Height cm<input name="height" type="number" min="0"></label><label>Price<input name="price" inputmode="decimal"></label></div><label>Retailer link<input name="retailerLink" type="url" placeholder="https://"></label><label>Notes<textarea name="notes" rows="3"></textarea></label><label>Status<select name="status"><option value="dont-own">Don't own</option><option value="own">Own</option></select></label><button type="submit">Save furniture</button></form></section>
+    </aside>
+  </main>
+  <script src="data.js?v=15"></script>
+  <script src="app.js?v=15"></script>
+</body>
+</html>
