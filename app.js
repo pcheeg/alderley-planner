@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  const WINDOW_DEPTH_CM = 12;
+
   const STORAGE_KEYS = {
     furniture: "alderleyPlanner:furnitureLibrary",
     layouts: "alderleyPlanner:layouts",
@@ -35,7 +37,8 @@
     libraryList: document.getElementById("libraryList"),
     addToRoomBtn: document.getElementById("addToRoomBtn"),
     furnitureForm: document.getElementById("furnitureForm"),
-    doorForm: document.getElementById("doorForm")
+    doorForm: document.getElementById("doorForm"),
+    windowForm: document.getElementById("windowForm")
   };
 
   seedLayouts();
@@ -64,6 +67,7 @@
     els.deleteBtn.addEventListener("click", deleteSelected);
     els.furnitureForm.addEventListener("submit", saveCustomFurniture);
     els.doorForm.addEventListener("submit", addDoor);
+    els.windowForm.addEventListener("submit", addWindow);
     window.addEventListener("resize", renderPlan);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", endDrag);
@@ -171,6 +175,28 @@
   }
   function addFurnitureToRoom() { const libraryItem = findLibraryItem(els.librarySelect.value); if (!libraryItem) return; const room = getSelectedRoom(); const layout = normalizeLayout(getActiveLayout()); const item = { id: uniqueId('placed'), furnitureId: libraryItem.id, x: Math.max(0, Math.round((room.width - libraryItem.width) / 2)), y: Math.max(0, Math.round((room.depth - libraryItem.depth) / 2)), rotation: 0 }; layout.items.push(item); state.selectedItem = { kind: 'furniture', id: item.id }; fitItemInsideRoom(item); saveLayouts(); renderAll(); }
   function addDoor(event) { event.preventDefault(); const form = new FormData(els.doorForm); const room = getSelectedRoom(); const door = { id: uniqueId('opening'), type: 'door', x: Math.round(room.width / 2 - 40), y: Math.round(room.depth / 2 - 40), width: Number(form.get('width')) || 80, depth: Number(form.get('depth')) || 80, swing: form.get('swing') || 'right', rotation: 0 }; normalizeLayout(getActiveLayout()).openings.push(door); state.selectedItem = { kind: 'opening', id: door.id }; fitDoorInsideRoom(door); saveLayouts(); renderAll(); }
+  function addWindow(event) {
+    event.preventDefault();
+    const form = new FormData(els.windowForm);
+    const room = getSelectedRoom();
+    const wall = form.get('wall');
+    const horizontal = wall === 'top' || wall === 'bottom';
+    const maxWidth = horizontal ? room.width : room.depth;
+    const width = Math.max(20, Number(form.get('width')) || 80);
+    const windowItem = {
+      id: uniqueId('opening'),
+      type: 'window',
+      wall,
+      width,
+      depth: WINDOW_DEPTH_CM,
+      offset: Math.max(0, Math.round((maxWidth - width) / 2))
+    };
+    normalizeLayout(getActiveLayout()).openings.push(windowItem);
+    state.selectedItem = { kind: 'opening', id: windowItem.id };
+    fitWindowInsideRoom(windowItem);
+    saveLayouts();
+    renderAll();
+  }
   function rotateSelected() { const selected = getSelectedThing(); if (!selected) return; if (selected.kind === 'opening') { if (selected.item.type === 'door') rotateDoor(selected.item); else rotateWindow(selected.item); } else { selected.item.rotation = (selected.item.rotation + 90) % 180; fitItemInsideRoom(selected.item); } saveLayouts(); renderAll(); }
   function rotateDoor(door) { door.rotation = ((door.rotation || 0) + 90) % 360; fitDoorInsideRoom(door); }
   function rotateWindow(opening) { const walls = ['top', 'right', 'bottom', 'left']; const index = walls.indexOf(opening.wall); opening.wall = walls[(index + 1) % walls.length]; fitWindowInsideRoom(opening); }
@@ -196,12 +222,12 @@
   function getPlacedSize(placedItem) { const item = findLibraryItem(placedItem.furnitureId); if (!item) return { width: 60, depth: 60 }; const rotated = placedItem.rotation % 180 !== 0; return { width: rotated ? item.depth : item.width, depth: rotated ? item.width : item.depth }; }
   function getDoorSize(door) { const rotated = (door.rotation || 0) % 180 !== 0; return { width: rotated ? door.depth : door.width, depth: rotated ? door.width : door.depth }; }
   function getDoorBox(door) { const size = getDoorSize(door); return { x: door.x || 0, y: door.y || 0, width: size.width, depth: size.depth }; }
-  function getWindowBox(opening) { const room = getSelectedRoom(); const depth = 12; if (opening.wall === 'top') return { x: opening.offset, y: -depth / 2, width: opening.width, depth }; if (opening.wall === 'bottom') return { x: opening.offset, y: room.depth - depth / 2, width: opening.width, depth }; if (opening.wall === 'left') return { x: -depth / 2, y: opening.offset, width: depth, depth: opening.width }; return { x: room.width - depth / 2, y: opening.offset, width: depth, depth: opening.width }; }
+  function getWindowBox(opening) { const room = getSelectedRoom(); const depth = WINDOW_DEPTH_CM; if (opening.wall === 'top') return { x: opening.offset, y: -depth / 2, width: opening.width, depth }; if (opening.wall === 'bottom') return { x: opening.offset, y: room.depth - depth / 2, width: opening.width, depth }; if (opening.wall === 'left') return { x: -depth / 2, y: opening.offset, width: depth, depth: opening.width }; return { x: room.width - depth / 2, y: opening.offset, width: depth, depth: opening.width }; }
   function getWindowPosition(opening) { const box = getWindowBox(opening); return { x: box.x, y: box.y }; }
   function getLegacyDoorBox(opening) { const room = getSelectedRoom(); const depth = Math.max(20, opening.depth || 80); if (opening.wall === 'top') return { x: opening.offset || 0, y: 0 }; if (opening.wall === 'bottom') return { x: opening.offset || 0, y: room.depth - depth }; if (opening.wall === 'left') return { x: 0, y: opening.offset || 0 }; return { x: room.width - depth, y: opening.offset || 0 }; }
   function fitItemInsideRoom(item) { const room = getSelectedRoom(); const size = getPlacedSize(item); item.x = clamp(item.x, 0, Math.max(0, room.width - size.width)); item.y = clamp(item.y, 0, Math.max(0, room.depth - size.depth)); }
   function fitDoorInsideRoom(door) { const room = getSelectedRoom(); door.width = Math.max(20, Number(door.width) || 80); door.depth = Math.max(20, Number(door.depth) || 80); const size = getDoorSize(door); door.x = clamp(Number(door.x) || 0, 0, Math.max(0, room.width - size.width)); door.y = clamp(Number(door.y) || 0, 0, Math.max(0, room.depth - size.depth)); }
-  function fitWindowInsideRoom(opening) { const room = getSelectedRoom(); const horizontal = opening.wall === 'top' || opening.wall === 'bottom'; const maxWidth = horizontal ? room.width : room.depth; opening.width = clamp(opening.width, 20, maxWidth); opening.offset = clamp(opening.offset, 0, Math.max(0, maxWidth - opening.width)); opening.depth = 12; }
+  function fitWindowInsideRoom(opening) { const room = getSelectedRoom(); const horizontal = opening.wall === 'top' || opening.wall === 'bottom'; const wallLength = horizontal ? room.width : room.depth; opening.width = Math.max(20, Number(opening.width) || 80); opening.offset = clamp(opening.offset, 0, Math.max(0, wallLength - opening.width)); opening.depth = WINDOW_DEPTH_CM; }
   function getFurnitureBox(item) { const size = getPlacedSize(item); return { id: item.id, x: item.x, y: item.y, width: size.width, depth: size.depth }; }
   function boxesOverlap(a, b) { return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.depth && a.y + a.depth > b.y; }
   function getOverlappingFurnitureIds(items) { const room = getSelectedRoom(); const boxes = items.map(getFurnitureBox); const ids = new Set(); boxes.forEach((box) => { if (box.width > room.width || box.depth > room.depth) ids.add(box.id); }); for (let i = 0; i < boxes.length; i += 1) { for (let j = i + 1; j < boxes.length; j += 1) { if (boxesOverlap(boxes[i], boxes[j])) { ids.add(boxes[i].id); ids.add(boxes[j].id); } } } return ids; }

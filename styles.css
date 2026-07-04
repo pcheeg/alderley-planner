@@ -36,7 +36,7 @@ h1, h2, p { margin-top: 0; } h1 { margin-bottom: 0; font-size: clamp(1.75rem, 4v
 .furniture.overlap { outline: 3px solid #d92d20; border-color: #d92d20; background: #ffe4e0; }
 .opening { z-index: 2; font-size: .68rem; font-weight: 800; color: #1c232b; }
 .opening-door { background: transparent; border: 0; overflow: visible; color: transparent; }
-.opening-window { background: rgba(207,232,255,.86); border: 2px solid #2b6cb0; }
+.opening-window { min-width: 0; min-height: 0; padding: 0; background: rgba(207,232,255,.86); border: 2px solid #2b6cb0; color: transparent; font-size: 0; }
 .opening-swing { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .door-arc, .door-leaf { fill: none; stroke: #b7791f; stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .door-arc { stroke-dasharray: 4 4; }

@@ -4,7 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Alderley Room Planner</title>
-  <link rel="stylesheet" href="styles.css?v=15">
+
+  <meta name="theme-color" content="#196b69">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Alderley Planner">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest?v=16">
+  <link rel="apple-touch-icon" href="icons/icon-192.png?v=16">
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
   <header class="app-header">
@@ -23,10 +31,16 @@
     <aside class="side-panel" aria-label="Planning tools">
       <section><h2>Furniture library</h2><div class="add-to-room"><select id="librarySelect"></select><button id="addToRoomBtn" type="button">Add to room</button></div><div id="libraryList" class="library-list"></div></section>
       <section><h2>Add door</h2><form id="doorForm" class="furniture-form"><div class="form-grid"><label>Width cm<input name="width" type="number" min="20" value="80" required></label><label>Swing depth cm<input name="depth" type="number" min="20" value="80" required></label></div><label>Door opens<select name="swing"><option value="right">Right</option><option value="left">Left</option></select></label><button type="submit">Add door</button></form></section>
+      <section><h2>Add window</h2><form id="windowForm" class="furniture-form"><div class="form-grid"><label>Wall<select name="wall"><option value="top">Top</option><option value="right">Right</option><option value="bottom">Bottom</option><option value="left">Left</option></select></label><label>Width cm<input name="width" type="number" min="20" value="80" required></label></div><button type="submit">Add window</button></form></section>
       <section><h2>Add custom furniture</h2><form id="furnitureForm" class="furniture-form"><label>Name<input name="name" required autocomplete="off"></label><label>Category<input name="category" required autocomplete="off"></label><div class="form-grid"><label>Width cm<input name="width" type="number" min="1" required></label><label>Depth cm<input name="depth" type="number" min="1" required></label></div><div class="form-grid"><label>Height cm<input name="height" type="number" min="0"></label><label>Price<input name="price" inputmode="decimal"></label></div><label>Retailer link<input name="retailerLink" type="url" placeholder="https://"></label><label>Notes<textarea name="notes" rows="3"></textarea></label><label>Status<select name="status"><option value="dont-own">Don't own</option><option value="own">Own</option></select></label><button type="submit">Save furniture</button></form></section>
     </aside>
   </main>
-  <script src="data.js?v=15"></script>
-  <script src="app.js?v=15"></script>
+  <script src="data.js?v=20"></script>
+  <script src="app.js?v=20"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js?v=16"));
+    }
+  </script>
 </body>
 </html>
